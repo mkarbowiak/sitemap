@@ -69,6 +69,27 @@ defmodule Sitemap.BuildersUrlTest do
     assert xpath(parsed, ~x"//priority/text()") == '0.5'
   end
 
+  test "Basic sitemap url with subdomain" do
+    data = [
+      lastmod: "lastmod",
+      expires: nil,
+      changefreq: nil,
+      priority: 0.5,
+      subdomain: "subdomain"
+    ]
+
+    actual =
+      Url.to_xml("loc", data)
+      |> XmlBuilder.generate()
+
+    parsed = parse(actual)
+    assert xpath(parsed, ~x"//loc/text()") == 'http://subdomain.example.com/loc'
+    assert xpath(parsed, ~x"//lastmod/text()") == 'lastmod'
+    assert xpath(parsed, ~x"//expires/text()") == nil
+    assert xpath(parsed, ~x"//changefreq/text()") == nil
+    assert xpath(parsed, ~x"//priority/text()") == '0.5'
+  end
+
   test "News sitemap url" do
     data = [
       news: [

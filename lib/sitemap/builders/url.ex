@@ -8,7 +8,7 @@ defmodule Sitemap.Builders.Url do
       element(
         :url,
         Funcs.eraser([
-          element(:loc, Path.join(Config.get().host, link || "")),
+          element(:loc, domain(link, attrs)),
           element(
             :lastmod,
             Funcs.iso8601(Keyword.get_lazy(attrs, :lastmod, fn -> Funcs.iso8601() end))
@@ -27,6 +27,18 @@ defmodule Sitemap.Builders.Url do
     elms = ifput(attrs[:videos], elms, &append_last(&1, videos(attrs[:videos])))
     elms = ifput(attrs[:alternates], elms, &append_last(&1, alternates(attrs[:alternates])))
     elms
+  end
+
+  def domain(link, attrs) do
+    sub = Keyword.get(attrs, :subdomain, "")
+    ssl = (String.split(Config.get().host, ":") |> List.first) <> "://"
+
+    case sub do
+      "" ->
+        Path.join(Config.get().host, link || "")
+      _ ->
+        Path.join(ssl <> String.replace(Config.get().host, ~r/https?:\/\/(www)?/, sub), link || "")
+    end |> String.replace(" ", "")
   end
 
   defp ifput(bool, elms, fun) do
