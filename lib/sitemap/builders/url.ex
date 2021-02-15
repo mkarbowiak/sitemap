@@ -29,7 +29,7 @@ defmodule Sitemap.Builders.Url do
     elms
   end
 
-  def domain(link, attrs) do
+  defp domain(link, attrs) do
     sub = Keyword.get(attrs, :subdomain, "")
     ssl = (String.split(Config.get().host, ":") |> List.first) <> "://"
 
@@ -37,7 +37,7 @@ defmodule Sitemap.Builders.Url do
       "" ->
         Path.join(Config.get().host, link || "")
       _ ->
-        Path.join(ssl <> String.replace(Config.get().host, ~r/https?:\/\/(www)?/, sub), link || "")
+        Path.join(ssl <> String.replace(Config.get().host, ~r/https?:\/\/(www.)?|^/, sub <> "."), link || "")
     end |> String.replace(" ", "")
   end
 
